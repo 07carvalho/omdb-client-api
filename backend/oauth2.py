@@ -3,12 +3,13 @@ Oauth2 implementation using Resource Owner Password Credentials:
 https://tools.ietf.org/html/draft-ietf-oauth-v2-30#section-1.3.3
 """
 import datetime
-import random
 import functools
+import random
 
 from google.cloud import ndb
 
-from backend import user, error
+from backend import error
+from backend.models import user
 
 
 class Unauthorized(error.Error):
@@ -20,6 +21,7 @@ class Decorator(object):
     Protorpc method decorators. Reads the Authorization header, or authorization
     query paramater, and exposes self.session.
     """
+
     def __call__(self, *args, **kwargs):
         return self.required()(*args, **kwargs)
 
@@ -36,6 +38,7 @@ class Decorator(object):
 
             wrapper.oauth2_required = True
             return wrapper
+
         return decorator
 
     @classmethod
@@ -56,6 +59,7 @@ class Decorator(object):
 
             wrapper.oauth2_optional = True
             return wrapper
+
         return decorator
 
 
@@ -107,7 +111,7 @@ class Oauth2(ndb.Model):
             created=datetime.datetime.now(),
             user_key=user_key,
             access_token_token=access_token.token,
-            refresh_token_token=refresh_token.token
+            refresh_token_token=refresh_token.token,
         )
 
         return entity
@@ -133,7 +137,10 @@ class Oauth2(ndb.Model):
             entity = cls._get(token)
 
             if entity is not None:
-                if entity.refresh_token.token != refresh_token or entity.refresh_token.expired():
+                if (
+                    entity.refresh_token.token != refresh_token
+                    or entity.refresh_token.expired()
+                ):
                     raise Unauthorized("Invalid or expired refresh token")
                 entity.revoke()
                 return cls.create(entity.user_key)
@@ -141,7 +148,11 @@ class Oauth2(ndb.Model):
         raise Unauthorized("Invalid or expired access token")
 
     def update(self, **kwargs):
-        updates = [setattr(self, key, value) for key, value in kwargs.items() if getattr(self, key) != value]
+        updates = [
+            setattr(self, key, value)
+            for key, value in kwargs.items()
+            if getattr(self, key) != value
+        ]
         if len(updates) > 0:
             self.put()
         return self
@@ -162,7 +173,9 @@ class Oauth2(ndb.Model):
 class AccessToken(object):
     def __init__(self, token, created=None):
         self.token = token
-        self.expires = (created or datetime.datetime.now()) + datetime.timedelta(hours=6)
+        self.expires = (created or datetime.datetime.now()) + datetime.timedelta(
+            hours=6
+        )
 
     @classmethod
     def create(cls):
@@ -175,7 +188,9 @@ class AccessToken(object):
 class RefreshToken(object):
     def __init__(self, token, created=None):
         self.token = token
-        self.expires = (created or datetime.datetime.now()) + datetime.timedelta(days=10)
+        self.expires = (created or datetime.datetime.now()) + datetime.timedelta(
+            days=10
+        )
 
     @classmethod
     def create(cls):

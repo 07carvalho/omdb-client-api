@@ -1,13 +1,13 @@
 import unittest
 
+from google.cloud import ndb
+
 # activate stubs
 import backend.stub.logging  # noqa F401
 import backend.stub.ndb  # noqa F401
-#
-
-from google.cloud import ndb
-
 from backend import api
+
+#
 
 
 class TestCase(unittest.TestCase):

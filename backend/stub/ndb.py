@@ -1,5 +1,4 @@
 from google.cloud import ndb
-
 from InMemoryCloudDatastoreStub import datastore_stub
 
 
