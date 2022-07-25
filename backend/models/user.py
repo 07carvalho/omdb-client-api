@@ -6,6 +6,7 @@ import re
 from google.cloud import ndb
 
 from backend import error
+from backend.models import base
 
 
 class EmailTaken(error.Error):
@@ -20,11 +21,7 @@ class CredentialsInvalid(error.Error):
     pass
 
 
-class NotFound(error.Error):
-    pass
-
-
-class UserCredentials(ndb.Model):
+class UserCredentials(base.BaseModel):
     email = ndb.StringProperty(indexed=True)
     email_verified = ndb.BooleanProperty(indexed=False)
     password = ndb.StringProperty(indexed=True)
@@ -96,21 +93,13 @@ class UserCredentials(ndb.Model):
         return self
 
 
-class User(ndb.Model):
+class User(base.BaseModel):
     created = ndb.DateTimeProperty(indexed=False)
     name = ndb.StringProperty(indexed=True)
     phone = ndb.StringProperty(indexed=True)
     normalized_name = ndb.ComputedProperty(
         lambda self: self.name and self.name.lower(), indexed=True
     )
-
-    @classmethod
-    def get(cls, id):
-        entity = ndb.Key(urlsafe=id).get()
-
-        if entity is None or not isinstance(entity, cls):
-            raise NotFound("No user found with id: %s" % id)
-        return entity
 
     @classmethod
     def get_by_email(cls, email):
@@ -193,10 +182,3 @@ class User(ndb.Model):
     @property
     def email_verified(self):
         return self.credentials.email_verified if self.credentials else None
-
-    @property
-    def id(self):
-        return self.key.urlsafe().decode("utf-8")
-
-    def __hash__(self):
-        return hash((self.__class__.__name__, self.id))
