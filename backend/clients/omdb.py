@@ -1,4 +1,5 @@
-from decouple import config
+import os
+
 from omdb import OMDBClient
 
 from backend import error
@@ -11,7 +12,7 @@ class MovieNotFound(error.Error):
 
 class OMDbClient:
     def __init__(self):
-        self.client = OMDBClient(apikey=config("OMDB_APIKEY"))
+        self.client = OMDBClient(apikey=os.getenv("OMDB_APIKEY"))
 
     def get_by_title(self, title: str) -> MovieSchema:
         result = self.client.title(title)
