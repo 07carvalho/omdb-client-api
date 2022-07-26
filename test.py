@@ -2,6 +2,7 @@
 import argparse
 import fnmatch
 import logging
+import os
 import sys
 import unittest
 
@@ -28,7 +29,7 @@ def test(pattern, test_pattern):
     print("======================================================================")
     print("Running tests")
     print("======================================================================")
-
+    os.environ["ENV"] = "test"
     suite = unittest.TestLoader().discover("backend/test", pattern=pattern)
 
     if test_pattern:
