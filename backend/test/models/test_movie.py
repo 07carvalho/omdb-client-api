@@ -1,4 +1,5 @@
 from backend import test
+from backend.exceptions import NotFound
 from backend.models import movie
 from backend.schemas.movie import MovieSchema
 
@@ -49,3 +50,9 @@ class TestMovie(test.TestCase):
         instance = movie.Movie.get(obj.id)
 
         self.assertEqual(obj, instance)
+
+    def test_movie_not_found(self):
+        with self.assertRaises(NotFound) as context:
+            movie.Movie.get("agRzdHVicgoLEgRVc2VyGAEM")
+
+        self.assertEqual(NotFound, type(context.exception))

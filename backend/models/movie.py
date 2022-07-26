@@ -2,13 +2,8 @@ from typing import List
 
 from google.cloud import ndb
 
-from backend import error
 from backend.models import base
 from backend.schemas.movie import MovieSchema
-
-
-class NotFound(error.Error):
-    pass
 
 
 class Movie(base.BaseModel):

@@ -8,12 +8,8 @@ import random
 
 from google.cloud import ndb
 
-from backend import error
+from backend.exceptions import Unauthorized
 from backend.models import user
-
-
-class Unauthorized(error.Error):
-    pass
 
 
 class Decorator(object):

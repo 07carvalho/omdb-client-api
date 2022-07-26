@@ -1,10 +1,6 @@
 from google.cloud import ndb
 
-from backend import error
-
-
-class NotFound(error.Error):
-    pass
+from backend.exceptions import NotFound
 
 
 class BaseModel(ndb.Model):
