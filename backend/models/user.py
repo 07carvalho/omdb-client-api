@@ -5,20 +5,8 @@ import re
 
 from google.cloud import ndb
 
-from backend import error
+from backend.exceptions import CredentialsInvalid, EmailInvalid, EmailTaken
 from backend.models import base
-
-
-class EmailTaken(error.Error):
-    pass
-
-
-class EmailInvalid(error.Error):
-    pass
-
-
-class CredentialsInvalid(error.Error):
-    pass
 
 
 class UserCredentials(base.BaseModel):

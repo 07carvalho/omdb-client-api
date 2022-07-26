@@ -2,12 +2,8 @@ import os
 
 from omdb import OMDBClient
 
-from backend import error
+from backend.exceptions import NotFound
 from backend.schemas.movie import MovieSchema
-
-
-class MovieNotFound(error.Error):
-    pass
 
 
 class OMDbClient:
@@ -17,7 +13,7 @@ class OMDbClient:
     def get_by_title(self, title: str) -> MovieSchema:
         result = self.client.title(title)
         if not result:
-            raise MovieNotFound()
+            raise NotFound("Movie not found")
         return MovieSchema(
             title=result.get("title"),
             imdb_id=result.get("Title"),
@@ -28,7 +24,7 @@ class OMDbClient:
     def search_movie(self, query: str, page=1):
         result = self.client.search_movie(string=query, page=page)
         if not result:
-            raise MovieNotFound()
+            raise NotFound("Movie not found")
         return [
             MovieSchema(
                 title=movie.get("title"),
