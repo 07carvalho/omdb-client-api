@@ -1,21 +1,26 @@
-from backend import error
+from backend.wsgi import ApplicationError
 
 
-class CredentialsInvalid(error.Error):
+class Error(ApplicationError):
+    def __init__(self, message=None):
+        super(Error, self).__init__(message, error_name=self.__class__.__name__)
+
+
+class CredentialsInvalid(Error):
     pass
 
 
-class EmailTaken(error.Error):
+class EmailTaken(Error):
     pass
 
 
-class EmailInvalid(error.Error):
+class EmailInvalid(Error):
     pass
 
 
-class NotFound(error.Error):
+class NotFound(Error):
     pass
 
 
-class Unauthorized(error.Error):
+class Unauthorized(Error):
     pass

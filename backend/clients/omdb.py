@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from omdb import OMDBClient
 
@@ -16,19 +17,19 @@ class OMDbClient:
             raise NotFound("Movie not found")
         return MovieSchema(
             title=result.get("title"),
-            imdb_id=result.get("Title"),
+            imdb_id=result.get("imdb_id"),
             year=result.get("year"),
             poster=result.get("poster"),
         )
 
-    def search_movie(self, query: str, page=1):
+    def search_movie(self, query: str, page=1) -> List[MovieSchema]:
         result = self.client.search_movie(string=query, page=page)
         if not result:
             raise NotFound("Movie not found")
         return [
             MovieSchema(
                 title=movie.get("title"),
-                imdb_id=movie.get("Title"),
+                imdb_id=movie.get("imdb_id"),
                 year=movie.get("year"),
                 poster=movie.get("poster"),
             )
