@@ -1,27 +1,10 @@
-import string
-
 from backend import test
-from backend.models import movie
-from backend.schemas.movie import MovieSchema
+from backend.test.factories import create_movies
 
 
 class TestMovieApi(test.TestCase):
-    def _create_bulk(self):
-        movies = []
-        chars = string.ascii_uppercase
-        for i in range(len(chars)):
-            movies.append(
-                MovieSchema(
-                    title=f"Shark {chars[i]}",
-                    imdb_id=f"tt207149{i}",
-                    year=f"201{i}",
-                    poster=f"https://poster.com/test{i}.png",
-                )
-            )
-        movie.Movie.bulk_create(movies)
-
     def test_list_without_params(self):
-        self._create_bulk()
+        create_movies()
 
         resp = self.api_client.post("movie.list")
 
@@ -29,10 +12,19 @@ class TestMovieApi(test.TestCase):
         self.assertEqual(resp.get("limit"), 10)
 
     def test_list_with_params(self):
-        self._create_bulk()
+        create_movies()
 
         resp = self.api_client.post("movie.list", dict(offset=10, limit=20))
 
         self.assertEqual(resp.get("offset"), 10)
         self.assertEqual(resp.get("limit"), 20)
         self.assertEqual(len(resp.get("results")), 16)
+
+    def test_list_with_wrong_offset(self):
+        resp = self.api_client.post("movie.list", dict(offset="A", limit=10))
+
+        self.assertEqual(resp.get("error").get("code"), "400 Bad Request")
+
+    def test_list_with_wrong_limit(self):
+        resp = self.api_client.post("movie.list", dict(offset=0, limit="A"))
+        self.assertEqual(resp.get("error").get("code"), "400 Bad Request")

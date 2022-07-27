@@ -28,7 +28,6 @@ class Movie(remote.Service):
     @swagger("List movies")
     @remote.method(ListRequest, ListResponse)
     def list(self, request):
-        print(request)
         offset = request.offset or 0
         limit = request.limit or 10
         instances = movie.Movie.limit_offset_list(offset, limit)

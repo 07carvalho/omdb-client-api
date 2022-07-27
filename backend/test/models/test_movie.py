@@ -4,23 +4,10 @@ from backend import test
 from backend.exceptions import NotFound
 from backend.models import movie
 from backend.schemas.movie import MovieSchema
+from backend.test.factories import create_movies
 
 
 class TestMovie(test.TestCase):
-    def _create_bulk(self):
-        movies = []
-        chars = string.ascii_uppercase
-        for i in range(len(chars)):
-            movies.append(
-                MovieSchema(
-                    title=f"Shark {chars[i]}",
-                    imdb_id=f"tt207149{i}",
-                    year=f"201{i}",
-                    poster=f"https://poster.com/test{i}.png",
-                )
-            )
-        movie.Movie.bulk_create(movies)
-
     def test_create(self):
         obj = movie.Movie.create(
             title="Shark Tale",
@@ -74,7 +61,7 @@ class TestMovie(test.TestCase):
         self.assertEqual(NotFound, type(context.exception))
 
     def test_limit_offset_list_without_params(self):
-        self._create_bulk()
+        create_movies()
 
         instances = movie.Movie.limit_offset_list()
 
@@ -83,7 +70,7 @@ class TestMovie(test.TestCase):
         self.assertEqual(instances[9].title, "Shark J")
 
     def test_limit_offset_list_with_params(self):
-        self._create_bulk()
+        create_movies()
 
         values = [[0, 10, 10], [10, 20, 16], [20, 20, 6], [30, 10, 0]]
         for item in values:
