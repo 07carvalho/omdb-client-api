@@ -1,11 +1,16 @@
 import random
 
 from backend import api
+from backend.clients.omdb import OMDbClient
 from backend.exceptions import NotFound
 from backend.models import movie
 from backend.pagination import LimitOffsetPagination
 from backend.swagger import swagger
 from backend.wsgi import messages, remote
+
+
+class CreateRequest(messages.Message):
+    title = messages.StringField(1, required=True)
 
 
 class GetRequest(messages.Message):
@@ -33,6 +38,31 @@ class ListResponse(messages.Message):
 
 @api.endpoint(path="movie", title="Movie API")
 class Movie(remote.Service):
+    @swagger("Create a movie")
+    @remote.method(CreateRequest, MovieResponse)
+    def create(self, request):
+        try:
+            response = OMDbClient().get_by_title(request.title)
+        except NotFound:
+            raise NotFound(message="Movie not found in IMDb")
+
+        instance = movie.Movie.create(
+            {
+                "title": response.title,
+                "imdb_id": response.imdb_id,
+                "year": response.year,
+                "poster": response.poster,
+            }
+        )
+
+        return MovieResponse(
+            id=instance.id,
+            title=response.title,
+            imdb_id=response.imdb_id,
+            year=response.year,
+            poster=response.poster,
+        )
+
     @swagger("Get a movie")
     @remote.method(GetRequest, MovieResponse)
     def get(self, request):

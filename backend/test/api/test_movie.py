@@ -1,4 +1,9 @@
+from unittest.mock import patch
+
+from omdb import OMDBClient
+
 from backend import test
+from backend.models import movie
 from backend.test.factories import create_movies
 
 
@@ -57,3 +62,36 @@ class TestMovieApi(test.TestCase):
         resp = self.api_client.post("movie.get", dict(title="Shark ABC"))
 
         self.assertEqual(resp.get("error").get("message"), "Movie not found")
+
+    def test_create_movie(self):
+        count = movie.Movie.count()
+        title = "Mega Shark - The return of the drowned"
+        data = {
+            "title": title,
+            "imdb_id": "tt123",
+            "year": "2022",
+            "poster": "https://localhost:8000/teste.png",
+        }
+
+        with patch.object(OMDBClient, "title", return_value=data) as mock_method:
+            resp = self.api_client.post("movie.create", dict(title=title))
+
+            mock_method.assert_called_once_with(title)
+            self.assertEqual(count + 1, movie.Movie.count())
+            self.assertEqual(resp.get("title"), title)
+            self.assertEqual(resp.get("imdb_id"), "tt123")
+            self.assertEqual(resp.get("year"), "2022")
+            self.assertEqual(resp.get("poster"), "https://localhost:8000/teste.png")
+
+    def test_create_movie_not_found(self):
+        count = movie.Movie.count()
+        title = "Sharks are bad"
+
+        with patch.object(OMDBClient, "title", return_value={}) as mock_method:
+            resp = self.api_client.post("movie.create", dict(title=title))
+
+            mock_method.assert_called_once_with(title)
+            self.assertEqual(count, movie.Movie.count())
+            self.assertEqual(
+                resp.get("error").get("message"), "Movie not found in IMDb"
+            )
