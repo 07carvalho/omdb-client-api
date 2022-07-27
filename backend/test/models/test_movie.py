@@ -90,3 +90,31 @@ class TestMovie(test.TestCase):
         instances = movie.Movie.limit_offset_list()
 
         self.assertEqual(len(instances), 0)
+
+    def test_filter_by_title(self):
+        create_movies()
+
+        instance = movie.Movie.filter_by("title", "Shark C")
+
+        self.assertEqual(instance.title, "Shark C")
+        self.assertEqual(instance.imdb_id, "tt2071492")
+        self.assertEqual(instance.year, "2012")
+        self.assertEqual(instance.poster, "https://poster.com/test2.png")
+
+    def test_filter_by_imdb_title(self):
+        create_movies()
+
+        instance = movie.Movie.filter_by("imdb_id", "tt2071492")
+
+        self.assertEqual(instance.title, "Shark C")
+        self.assertEqual(instance.imdb_id, "tt2071492")
+        self.assertEqual(instance.year, "2012")
+        self.assertEqual(instance.poster, "https://poster.com/test2.png")
+
+    def test_filter_by_invalid_field(self):
+        create_movies()
+
+        with self.assertRaises(AttributeError) as context:
+            movie.Movie.filter_by("duration", "122")
+
+            self.assertEqual(AttributeError, type(context.exception))
