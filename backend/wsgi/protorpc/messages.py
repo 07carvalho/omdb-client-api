@@ -804,6 +804,17 @@ class Message(object, metaclass=_MessageClass):
     return iter(cls.__by_name.values())
 
   @classmethod
+  def all_keys(cls):
+    """Get all key definition objects.
+
+    Ordering is arbitrary.
+
+    Returns:
+      Iterator over all key in arbitrary order.
+    """
+    return iter(cls.__by_name.keys())
+
+  @classmethod
   def field_by_name(cls, name):
     """Get field by name.
 

@@ -18,6 +18,10 @@ class BaseModel(ndb.Model):
             raise NotFound(f"No instance found with id: {instance_id}")
         return instance
 
+    @classmethod
+    def count(cls) -> int:
+        return cls.query().count()
+
     @property
     def id(self):
         return self.key.urlsafe().decode("utf-8")

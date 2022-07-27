@@ -22,5 +22,9 @@ class NotFound(Error):
     pass
 
 
+class PaginationFieldMissingOrInvalid(Error):
+    pass
+
+
 class Unauthorized(Error):
     pass
