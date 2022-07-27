@@ -4,13 +4,19 @@ from backend import api
 from backend.clients.omdb import OMDbClient
 from backend.exceptions import NotFound
 from backend.models import movie
+from backend.oauth2 import oauth2
 from backend.pagination import LimitOffsetPagination
 from backend.swagger import swagger
 from backend.wsgi import messages, remote
+from backend.wsgi.protorpc import message_types
 
 
 class CreateRequest(messages.Message):
     title = messages.StringField(1, required=True)
+
+
+class DeleteRequest(messages.Message):
+    id = messages.StringField(1, required=True)
 
 
 class GetRequest(messages.Message):
@@ -96,3 +102,10 @@ class Movie(remote.Service):
             offset=offset,
             limit=limit,
         ).get_pagination()
+
+    @swagger("Delete movie")
+    @oauth2.required()
+    @remote.method(DeleteRequest, message_types.VoidMessage)
+    def delete(self, request):
+        movie.Movie.delete(request.id)
+        return message_types.VoidMessage()

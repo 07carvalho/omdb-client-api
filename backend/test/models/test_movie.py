@@ -118,3 +118,15 @@ class TestMovie(test.TestCase):
             movie.Movie.filter_by("duration", "122")
 
             self.assertEqual(AttributeError, type(context.exception))
+
+    def test_delete(self):
+        obj = movie.Movie.create(
+            title="Mega Shark vs. Giant Octopus",
+            imdb_id="tt1350498",
+            year="2009",
+            poster="https://poster.com/test3.png",
+        )
+
+        movie.Movie.delete(obj.id)
+
+        self.assertEqual(movie.Movie.count(), 0)

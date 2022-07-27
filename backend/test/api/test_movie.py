@@ -95,3 +95,33 @@ class TestMovieApi(test.TestCase):
             self.assertEqual(
                 resp.get("error").get("message"), "Movie not found in IMDb"
             )
+
+    def test_delete_authorized_user(self):
+        instance = movie.Movie.create(
+            title="Mega Shark vs. Giant Octopus",
+            imdb_id="tt1350498",
+            year="2009",
+            poster="https://poster.com/test3.png",
+        )
+        self.assertEqual(movie.Movie.count(), 1)
+        resp = self.api_client.post(
+            "user.create", dict(email="test@gmail.com", password="test")
+        )
+        access_token = resp.get("access_token")
+
+        resp = self.api_client.post(
+            "movie.delete",
+            dict(id=instance.id),
+            headers=dict(authorization=access_token),
+        )
+
+        self.assertEqual(movie.Movie.count(), 0)
+        self.assertEqual(resp, {})
+
+    def test_delete_not_authorized_user(self):
+        resp = self.api_client.post("movie.delete", dict(id="abcAsgd"))
+
+        self.assertEqual(
+            resp.get("error").get("message"), "Invalid or expired access token"
+        )
+        self.assertEqual(resp.get("error").get("error_name"), "Unauthorized")
