@@ -22,6 +22,15 @@ class BaseModel(ndb.Model):
     def count(cls) -> int:
         return cls.query().count()
 
+    @classmethod
+    def filter_by(cls, field: str, query: str):
+        try:
+            model_field = getattr(cls, field)
+        except AttributeError:
+            raise AttributeError("Field does not exists in this model")
+        instances = cls.query(model_field == query).fetch(1)
+        return instances[0] if instances else None
+
     @property
     def id(self):
         return self.key.urlsafe().decode("utf-8")
