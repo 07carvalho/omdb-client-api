@@ -33,7 +33,7 @@ class ListResponse(messages.Message):
 
 @api.endpoint(path="movie", title="Movie API")
 class Movie(remote.Service):
-    @swagger("Get a movie by title")
+    @swagger("Get a movie")
     @remote.method(GetRequest, MovieResponse)
     def get(self, request):
         if request.title:
