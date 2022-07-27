@@ -29,5 +29,5 @@ class Movie(base.BaseModel):
         return ndb.put_multi(instances)
 
     @classmethod
-    def count(cls) -> int:
-        return cls.query().count()
+    def limit_offset_list(cls, offset=0, limit=10):
+        return cls.query().order(cls.title).fetch(offset=offset, limit=limit)
