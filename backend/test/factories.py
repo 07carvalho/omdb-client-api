@@ -16,4 +16,4 @@ def create_movies():
                 poster=f"https://poster.com/test{i}.png",
             )
         )
-    movie.Movie.bulk_create(movies)
+    return movie.Movie.bulk_create(movies)

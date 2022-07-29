@@ -1,5 +1,3 @@
-import random
-
 from backend import api
 from backend.clients.omdb import OMDbClient
 from backend.exceptions import NotFound
@@ -20,7 +18,8 @@ class DeleteRequest(messages.Message):
 
 
 class GetRequest(messages.Message):
-    title = messages.StringField(1)
+    id = messages.StringField(1)
+    title = messages.StringField(2)
 
 
 class ListRequest(messages.Message):
@@ -72,12 +71,11 @@ class Movie(remote.Service):
     @swagger("Get a movie")
     @remote.method(GetRequest, MovieResponse)
     def get(self, request):
-        if request.title:
-            instance = movie.Movie.filter_by("title", request.title)
-        else:
-            instance = movie.Movie.limit_offset_list(
-                random.randint(1, movie.Movie.count() - 1), 1
-            )[0]
+        instance = None
+        if movie_id := request.id:
+            instance = movie.Movie.get(movie_id)
+        elif title := request.title:
+            instance = movie.Movie.filter_by("title", title)
 
         if instance is None:
             raise NotFound(message="Movie not found")

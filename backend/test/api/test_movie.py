@@ -35,16 +35,21 @@ class TestMovieApi(test.TestCase):
 
         self.assertEqual(resp.get("error").get("code"), "400 Bad Request")
 
-    def test_get_a_movie(self):
-        create_movies()
+    def test_get_a_movie_by_id(self):
+        instance = movie.Movie.create(
+            title="Mega Shark vs. Giant Octopus",
+            imdb_id="tt1350498",
+            year="2009",
+            poster="https://poster.com/test3.png",
+        )
 
-        resp = self.api_client.post("movie.get")
+        resp = self.api_client.post("movie.get", dict(id=instance.id))
 
-        self.assertTrue("id" in resp)
-        self.assertTrue("title" in resp)
-        self.assertTrue("imdb_id" in resp)
-        self.assertTrue("year" in resp)
-        self.assertTrue("poster" in resp)
+        self.assertEqual(resp.get("id"), instance.id)
+        self.assertEqual(resp.get("title"), instance.title)
+        self.assertEqual(resp.get("imdb_id"), instance.imdb_id)
+        self.assertEqual(resp.get("year"), instance.year)
+        self.assertEqual(resp.get("poster"), instance.poster)
 
     def test_get_by_title(self):
         create_movies()
