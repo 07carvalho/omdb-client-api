@@ -35,16 +35,21 @@ class TestMovieApi(test.TestCase):
 
         self.assertEqual(resp.get("error").get("code"), "400 Bad Request")
 
-    def test_get_a_movie(self):
-        create_movies()
+    def test_get_a_movie_by_id(self):
+        instance = movie.Movie.create(
+            title="Mega Shark vs. Giant Octopus",
+            imdb_id="tt1350498",
+            year="2009",
+            poster="https://poster.com/test3.png",
+        )
 
-        resp = self.api_client.post("movie.get")
+        resp = self.api_client.post("movie.get", dict(id=instance.id))
 
-        self.assertTrue("id" in resp)
-        self.assertTrue("title" in resp)
-        self.assertTrue("imdb_id" in resp)
-        self.assertTrue("year" in resp)
-        self.assertTrue("poster" in resp)
+        self.assertEqual(resp.get("id"), instance.id)
+        self.assertEqual(resp.get("title"), instance.title)
+        self.assertEqual(resp.get("imdb_id"), instance.imdb_id)
+        self.assertEqual(resp.get("year"), instance.year)
+        self.assertEqual(resp.get("poster"), instance.poster)
 
     def test_get_by_title(self):
         create_movies()
@@ -95,3 +100,33 @@ class TestMovieApi(test.TestCase):
             self.assertEqual(
                 resp.get("error").get("message"), "Movie not found in IMDb"
             )
+
+    def test_delete_authorized_user(self):
+        instance = movie.Movie.create(
+            title="Mega Shark vs. Giant Octopus",
+            imdb_id="tt1350498",
+            year="2009",
+            poster="https://poster.com/test3.png",
+        )
+        self.assertEqual(movie.Movie.count(), 1)
+        resp = self.api_client.post(
+            "user.create", dict(email="test@gmail.com", password="test")
+        )
+        access_token = resp.get("access_token")
+
+        resp = self.api_client.post(
+            "movie.delete",
+            dict(id=instance.id),
+            headers=dict(authorization=access_token),
+        )
+
+        self.assertEqual(movie.Movie.count(), 0)
+        self.assertEqual(resp, {})
+
+    def test_delete_not_authorized_user(self):
+        resp = self.api_client.post("movie.delete", dict(id="abcAsgd"))
+
+        self.assertEqual(
+            resp.get("error").get("message"), "Invalid or expired access token"
+        )
+        self.assertEqual(resp.get("error").get("error_name"), "Unauthorized")

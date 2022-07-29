@@ -1,20 +1,25 @@
-import random
-
 from backend import api
 from backend.clients.omdb import OMDbClient
 from backend.exceptions import NotFound
 from backend.models import movie
+from backend.oauth2 import oauth2
 from backend.pagination import LimitOffsetPagination
 from backend.swagger import swagger
 from backend.wsgi import messages, remote
+from backend.wsgi.protorpc import message_types
 
 
 class CreateRequest(messages.Message):
     title = messages.StringField(1, required=True)
 
 
+class DeleteRequest(messages.Message):
+    id = messages.StringField(1, required=True)
+
+
 class GetRequest(messages.Message):
-    title = messages.StringField(1)
+    id = messages.StringField(1)
+    title = messages.StringField(2)
 
 
 class ListRequest(messages.Message):
@@ -66,12 +71,11 @@ class Movie(remote.Service):
     @swagger("Get a movie")
     @remote.method(GetRequest, MovieResponse)
     def get(self, request):
-        if request.title:
-            instance = movie.Movie.filter_by("title", request.title)
-        else:
-            instance = movie.Movie.limit_offset_list(
-                random.randint(1, movie.Movie.count() - 1), 1
-            )[0]
+        instance = None
+        if movie_id := request.id:
+            instance = movie.Movie.get(movie_id)
+        elif title := request.title:
+            instance = movie.Movie.filter_by("title", title)
 
         if instance is None:
             raise NotFound(message="Movie not found")
@@ -96,3 +100,10 @@ class Movie(remote.Service):
             offset=offset,
             limit=limit,
         ).get_pagination()
+
+    @swagger("Delete movie")
+    @oauth2.required()
+    @remote.method(DeleteRequest, message_types.VoidMessage)
+    def delete(self, request):
+        movie.Movie.delete(request.id)
+        return message_types.VoidMessage()
