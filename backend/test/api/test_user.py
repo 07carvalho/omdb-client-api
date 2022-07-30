@@ -71,6 +71,23 @@ class TestUserApi(test.TestCase):
         )
         self.assertTrue(resp.get("error"))
 
+    def test_renew_invalid_token(self):
+        session = self.api_client.post(
+            "user.create", dict(email="test@gmail.com", password="test")
+        )
+
+        resp = self.api_client.post(
+            "user.token",
+            dict(
+                access_token="invalid-token",
+                refresh_token=session.get("refresh_token"),
+            ),
+        )
+
+        self.assertEqual(
+            resp.get("error").get("message"), "Invalid or expired access token"
+        )
+
     def test_search_by_name(self):
         access_token = factories.create_user_and_get_access_token(self.api_client)
 

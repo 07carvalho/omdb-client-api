@@ -93,10 +93,10 @@ class Movie(remote.Service):
     def list(self, request):
         offset = request.offset or 0
         limit = request.limit or 10
-        instances = movie.Movie.limit_offset_list(offset, limit)
+        entities = movie.Movie.limit_offset_list(offset, limit)
         return LimitOffsetPagination(
             serializer=ListResponse,
-            instances=instances,
+            entities=entities,
             offset=offset,
             limit=limit,
         ).get_pagination()

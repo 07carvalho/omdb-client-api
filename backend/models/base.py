@@ -28,8 +28,8 @@ class BaseModel(ndb.Model):
             model_field = getattr(cls, field)
         except AttributeError:
             raise AttributeError("Field does not exists in this model")
-        instances = cls.query(model_field == query).fetch(1)
-        return instances[0] if instances else None
+        entities = cls.query(model_field == query).fetch(1)
+        return entities[0] if entities else None
 
     @property
     def id(self):

@@ -10,7 +10,7 @@ from backend.wsgi.protorpc import messages
 class TestPagination(test.TestCase):
     def test_pagination(self):
         create_movies()
-        instances = movie.Movie.limit_offset_list()
+        entities = movie.Movie.limit_offset_list()
 
         class ListResponse(messages.Message):
             offset = messages.IntegerField(1)
@@ -19,7 +19,7 @@ class TestPagination(test.TestCase):
 
         pagination = LimitOffsetPagination(
             serializer=ListResponse,
-            instances=instances,
+            entities=entities,
             offset=0,
             limit=10,
         ).get_pagination()
@@ -27,12 +27,12 @@ class TestPagination(test.TestCase):
         self.assertEqual(type(pagination), ListResponse)
         self.assertEqual(pagination.offset, 0)
         self.assertEqual(pagination.limit, 10)
-        self.assertEqual(len(pagination.results), len(instances))
+        self.assertEqual(len(pagination.results), len(entities))
         self.assertTrue(all([type(i) == MovieResponse for i in pagination.results]))
 
     def test_pagination_serializer_invalid(self):
         create_movies()
-        instances = movie.Movie.limit_offset_list()
+        entities = movie.Movie.limit_offset_list()
 
         class ListResponse(messages.Message):
             offset = messages.IntegerField(1)
@@ -41,7 +41,7 @@ class TestPagination(test.TestCase):
         with self.assertRaises(KeyError) as context:
             LimitOffsetPagination(
                 serializer=ListResponse,
-                instances=instances,
+                entities=entities,
                 offset=0,
                 limit=10,
             ).get_pagination()
@@ -50,7 +50,7 @@ class TestPagination(test.TestCase):
 
     def test_invalid_offset(self):
         create_movies()
-        instances = movie.Movie.limit_offset_list()
+        entities = movie.Movie.limit_offset_list()
 
         class ListResponse(messages.Message):
             offset = messages.IntegerField(1)
@@ -60,7 +60,7 @@ class TestPagination(test.TestCase):
         with self.assertRaises(PaginationFieldMissingOrInvalid) as context:
             LimitOffsetPagination(
                 serializer=ListResponse,
-                instances=instances,
+                entities=entities,
                 offset="A",
                 limit=10,
             ).get_pagination()
@@ -69,7 +69,7 @@ class TestPagination(test.TestCase):
 
     def test_invalid_limit(self):
         create_movies()
-        instances = movie.Movie.limit_offset_list()
+        entities = movie.Movie.limit_offset_list()
 
         class NewResponse(messages.Message):
             offset = messages.IntegerField(1)
@@ -79,7 +79,7 @@ class TestPagination(test.TestCase):
         with self.assertRaises(PaginationFieldMissingOrInvalid) as context:
             LimitOffsetPagination(
                 serializer=NewResponse,
-                instances=instances,
+                entities=entities,
                 offset=10,
                 limit="X",
             ).get_pagination()
@@ -94,7 +94,7 @@ class TestPagination(test.TestCase):
 
         pagination = LimitOffsetPagination(
             serializer=NewResponse,
-            instances=[],
+            entities=[],
             offset=10,
             limit=10,
         ).get_pagination()
