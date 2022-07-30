@@ -75,8 +75,8 @@ class UpdateEmailRequest(messages.Message):
 
 
 class UpdateRequest(messages.Message):
-    name = messages.StringField(1)
-    phone = messages.StringField(2)
+    name = messages.StringField(1, required=True)
+    phone = messages.StringField(2, required=True)
 
 
 @api.endpoint(path="user", title="User API")
@@ -134,6 +134,11 @@ class User(remote.Service):
 
     @oauth2.required()
     @remote.method(message_types.VoidMessage, EmailVerifiedResponse)
+    def verify_email(self, request):
+        return EmailVerifiedResponse(email_verified=self.session.user.verify_email())
+
+    @oauth2.required()
+    @remote.method(message_types.VoidMessage, EmailVerifiedResponse)
     def email_verified(self, request):
         return EmailVerifiedResponse(email_verified=self.session.user.email_verified)
 
@@ -153,7 +158,6 @@ class User(remote.Service):
     @oauth2.required()
     @remote.method(SearchRequest, SearchResponse)
     def search(self, request):
-        users = []
         if "@" in request.search:
             users = [user.User.get_by_email(request.search)]
         else:
