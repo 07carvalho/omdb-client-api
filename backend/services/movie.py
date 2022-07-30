@@ -1,3 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
+from itertools import repeat
+
 from backend.clients.omdb import OMDbClient
 from backend.models.movie import Movie
 
@@ -6,7 +9,10 @@ class MovieService:
     @staticmethod
     def populate_database():
         movies = []
-        for page in range(1, 11):
-            movies_per_page = OMDbClient().search_movie(query="shark", page=page)
-            movies.extend(movies_per_page)
+        pages = [page for page in range(1, 11)]
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            search_movie = OMDbClient().search_movie
+            # yes, just shark movies
+            for i in pool.map(search_movie, repeat("shark"), pages):
+                movies.extend(i)
         return Movie.bulk_create(movies)

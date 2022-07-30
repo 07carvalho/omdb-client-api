@@ -1,5 +1,6 @@
 import os
 import pkgutil
+import time
 
 from google.cloud import ndb
 
@@ -20,9 +21,12 @@ endpoint = application.service
 
 with ndb_client.context():
     if Movie.count() == 0 and os.getenv("ENV") != "test":
+        start_time = time.time()
         print("No movie in the database. Please wait while we prepare everything...")
         MovieService.populate_database()
-        print(f"Done! The database was populated with {Movie.count()} movies!")
+        print(
+            f"Done! The database was populated with {Movie.count()} movies in {'{:.3f}'.format(time.time() - start_time)} seconds!"
+        )
 
 for _, modname, _ in pkgutil.walk_packages(
     path=pkgutil.extend_path(__path__, __name__), prefix=__name__ + "."
