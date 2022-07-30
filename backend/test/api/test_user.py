@@ -1,5 +1,5 @@
 from backend import test
-from backend.test.factories import create_user_and_get_access_token
+from backend.test import factories
 
 
 class TestUserApi(test.TestCase):
@@ -25,14 +25,14 @@ class TestUserApi(test.TestCase):
         self.assertFalse(resp.get("email_verified"))
 
     def test_login(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         resp = self.api_client.post("user.me", headers=dict(authorization=access_token))
 
         self.assertEqual(resp.get("email"), "test@gmail.com")
 
     def test_logout(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
         resp = self.api_client.post("user.me", headers=dict(authorization=access_token))
         self.assertEqual(resp.get("email"), "test@gmail.com")
 
@@ -72,7 +72,7 @@ class TestUserApi(test.TestCase):
         self.assertTrue(resp.get("error"))
 
     def test_search_by_name(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         resp = self.api_client.post(
             "user.search", dict(search="test"), headers=dict(authorization=access_token)
@@ -81,7 +81,7 @@ class TestUserApi(test.TestCase):
         self.assertEqual(len(resp.get("users")), 1)
 
     def test_search_by_email(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         resp = self.api_client.post(
             "user.search",
@@ -92,7 +92,7 @@ class TestUserApi(test.TestCase):
         self.assertEqual(len(resp.get("users")), 1)
 
     def test_update_password(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         resp = self.api_client.post(
             "user.update_password",
@@ -106,8 +106,28 @@ class TestUserApi(test.TestCase):
         )
         self.assertEqual(resp.get("error"), None)
 
+    def test_update_wrong_password(self):
+        access_token = factories.create_user_and_get_access_token(self.api_client)
+
+        resp = self.api_client.post(
+            "user.update_password",
+            dict(current_password="wrong-password", password="new-password"),
+            headers=dict(authorization=access_token),
+        )
+
+        self.assertEqual(
+            resp.get("error").get("message"), "Current password is invalid"
+        )
+        resp = self.api_client.post(
+            "user.login", dict(email="test@gmail.com", password="new-password")
+        )
+        self.assertEqual(
+            resp.get("error").get("message"),
+            "No user found with given email and password",
+        )
+
     def test_update_user(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         self.api_client.post(
             "user.update",
@@ -120,7 +140,7 @@ class TestUserApi(test.TestCase):
         self.assertEqual(resp.get("phone"), "9999999999")
 
     def test_update_email(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         resp = self.api_client.post(
             "user.update_email",
@@ -133,8 +153,49 @@ class TestUserApi(test.TestCase):
         )
         self.assertEqual(resp.get("error"), None)
 
+    def test_update_invalid_email(self):
+        access_token = factories.create_user_and_get_access_token(self.api_client)
+
+        resp = self.api_client.post(
+            "user.update_email",
+            dict(current_password="test", email="test2gmail.com"),
+            headers=dict(authorization=access_token),
+        )
+
+        self.assertEqual(
+            resp.get("error").get("message"),
+            "test2gmail.com is not a valid email address",
+        )
+
+    def test_update_email_already_used(self):
+        factories.create_user()
+        access_token = factories.create_user_and_get_access_token(self.api_client)
+
+        resp = self.api_client.post(
+            "user.update_email",
+            dict(current_password="test", email="test@test.com"),
+            headers=dict(authorization=access_token),
+        )
+
+        self.assertEqual(
+            resp.get("error").get("message"), "test@test.com is already in use"
+        )
+
+    def test_update_email_wrong_password(self):
+        access_token = factories.create_user_and_get_access_token(self.api_client)
+
+        resp = self.api_client.post(
+            "user.update_email",
+            dict(current_password="wrong-password", email="new.test@test.com"),
+            headers=dict(authorization=access_token),
+        )
+
+        self.assertEqual(
+            resp.get("error").get("message"), "Current password is invalid"
+        )
+
     def test_verify_email(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
 
         resp = self.api_client.post(
             "user.verify_email",
@@ -144,7 +205,7 @@ class TestUserApi(test.TestCase):
         self.assertTrue(resp.get("email_verified"))
 
     def test_email_verified(self):
-        access_token = create_user_and_get_access_token(self.api_client)
+        access_token = factories.create_user_and_get_access_token(self.api_client)
         self.api_client.post(
             "user.verify_email",
             headers=dict(authorization=access_token),

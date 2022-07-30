@@ -107,9 +107,9 @@ class User(base.BaseModel):
     def login(cls, email, password):
         entity = cls.get_by_email(email)
 
-        if entity and entity.credentials.verify(password):
-            return entity
-        raise CredentialsInvalid("No user found with given email and password")
+        if entity is None or not entity.credentials.verify(password):
+            raise CredentialsInvalid("No user found with given email and password")
+        return entity
 
     @classmethod
     def search(cls, search, offset=0, limit=25):
