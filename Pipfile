@@ -16,6 +16,7 @@ google-cloud-logging = "==1.15.1"
 google-cloud-ndb = "==1.7.1"
 gunicorn = "==20.0.4"
 omdb = "==0.10.1"
+coverage-badge = "*"
 
 [requires]
 python_version = "3.8"

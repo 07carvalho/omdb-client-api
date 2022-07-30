@@ -4,6 +4,13 @@ from backend.models import movie
 from backend.schemas.movie import MovieSchema
 
 
+def create_user_and_get_access_token(client):
+    resp = client.post(
+        "user.create", dict(name="test", email="test@gmail.com", password="test")
+    )
+    return resp.get("access_token")
+
+
 def create_movies():
     movies = []
     chars = string.ascii_uppercase

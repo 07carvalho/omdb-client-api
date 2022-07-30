@@ -1,3 +1,5 @@
+# omdb-client-api
+
 ## Running the project:
 
 ### Start the backend:

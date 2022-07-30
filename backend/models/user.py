@@ -22,6 +22,7 @@ class UserCredentials(base.BaseModel):
         entity = cls(
             parent=user.key,
             email=email,
+            email_verified=False,
             password=cls._hash_password(salt, password),
             salt=salt,
         )
@@ -59,6 +60,11 @@ class UserCredentials(base.BaseModel):
             self._hash_password(self.salt, password) == self.password
             or self._legacy_hash_password(self.salt, password) == self.password
         )
+
+    def verify_email(self):
+        self.email_verified = True
+        self.put()
+        return True
 
     def update_password(self, password):
         self.salt = "%040x" % random.getrandbits(160)
@@ -134,7 +140,7 @@ class User(base.BaseModel):
     def update(self, **kwargs):
         updates = [
             setattr(self, key, value)
-            for key, value in kwargs.iteritems()
+            for key, value in kwargs.items()
             if getattr(self, key) != value
         ]
         if len(updates) > 0:
@@ -166,6 +172,9 @@ class User(base.BaseModel):
     @property
     def email(self):
         return self.credentials.email if self.credentials else None
+
+    def verify_email(self):
+        return self.credentials.verify_email()
 
     @property
     def email_verified(self):
