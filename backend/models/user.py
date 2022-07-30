@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import hashlib
 import random
 import re
+from typing import Union
 
 from google.cloud import ndb
 
@@ -16,7 +19,7 @@ class UserCredentials(base.BaseModel):
     salt = ndb.StringProperty(indexed=True)
 
     @classmethod
-    def create(cls, user, email, password):
+    def create(cls, user: str, email: str, password: str) -> UserCredentials:
         salt = "%040x" % random.getrandbits(160)
 
         entity = cls(
@@ -30,23 +33,23 @@ class UserCredentials(base.BaseModel):
         return entity
 
     @classmethod
-    def get_by_email(cls, email):
+    def get_by_email(cls, email: str) -> Union[UserCredentials, None]:
         entities = cls.query(cls.email == email).fetch(1)
         return entities[0] if entities else None
 
     @classmethod
-    def get_by_user(cls, user):
+    def get_by_user(cls, user: User) -> Union[UserCredentials, None]:
         entities = cls.query(ancestor=user.key).fetch(1)
         return entities[0] if entities else None
 
     @classmethod
-    def _hash_password(cls, salt, password):
+    def _hash_password(cls, salt: str, password: str) -> str:
         return hashlib.sha512(
             ("%s%s" % (salt, (password or ""))).encode("utf8")
         ).hexdigest()
 
     @classmethod
-    def _legacy_hash_password(cls, salt, password):
+    def _legacy_hash_password(cls, salt: str, password: str) -> str:
         return hashlib.sha256(
             ("%s%s" % (salt, (password or ""))).encode("utf8")
         ).hexdigest()
@@ -61,7 +64,7 @@ class UserCredentials(base.BaseModel):
             or self._legacy_hash_password(self.salt, password) == self.password
         )
 
-    def verify_email(self):
+    def verify_email(self) -> bool:
         self.email_verified = True
         self.put()
         return True
@@ -79,7 +82,7 @@ class UserCredentials(base.BaseModel):
     def update(self, **kwargs):
         updates = [
             setattr(self, key, value)
-            for key, value in kwargs.iteritems()
+            for key, value in kwargs.items()
             if getattr(self, key) != value
         ]
         if len(updates) > 0:
