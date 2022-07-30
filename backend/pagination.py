@@ -2,9 +2,9 @@ from backend.exceptions import PaginationFieldMissingOrInvalid
 
 
 class LimitOffsetPagination:
-    def __init__(self, serializer, instances, offset: int, limit: int):
+    def __init__(self, serializer, entities, offset: int, limit: int):
         self.serializer = serializer
-        self.instances = instances
+        self.entities = entities
         self.offset = offset
         self.limit = limit
 
@@ -29,7 +29,7 @@ class LimitOffsetPagination:
 
     def serialize_data(self):
         results = []
-        if len(self.instances) == 0:
+        if len(self.entities) == 0:
             return results
 
         try:
@@ -38,7 +38,7 @@ class LimitOffsetPagination:
             raise KeyError("Response should have 'results' field")
         instance_message_class = result_field_class.message_type
         keys = [key for key in instance_message_class().all_keys()]
-        for instance in self.instances:
+        for instance in self.entities:
             obj = instance_message_class()
             for key in keys:
                 setattr(obj, key, getattr(instance, key))

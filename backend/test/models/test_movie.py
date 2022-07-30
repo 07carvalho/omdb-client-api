@@ -63,33 +63,33 @@ class TestMovie(test.TestCase):
     def test_limit_offset_list_without_params(self):
         create_movies()
 
-        instances = movie.Movie.limit_offset_list()
+        entities = movie.Movie.limit_offset_list()
 
-        self.assertEqual(len(instances), 10)
-        self.assertEqual(instances[0].title, "Shark A")
-        self.assertEqual(instances[9].title, "Shark J")
+        self.assertEqual(len(entities), 10)
+        self.assertEqual(entities[0].title, "Shark A")
+        self.assertEqual(entities[9].title, "Shark J")
 
     def test_limit_offset_list_with_params(self):
         create_movies()
 
         values = [[0, 10, 10], [10, 20, 16], [20, 20, 6], [30, 10, 0]]
         for item in values:
-            instances = movie.Movie.limit_offset_list(offset=item[0], limit=item[1])
+            entities = movie.Movie.limit_offset_list(offset=item[0], limit=item[1])
 
-            self.assertEqual(len(instances), item[2])
-            if len(instances) > 0:
+            self.assertEqual(len(entities), item[2])
+            if len(entities) > 0:
                 self.assertEqual(
-                    instances[0].title, f"Shark {string.ascii_uppercase[item[0]]}"
+                    entities[0].title, f"Shark {string.ascii_uppercase[item[0]]}"
                 )
                 self.assertEqual(
-                    instances[len(instances) - 1].title,
-                    f"Shark {string.ascii_uppercase[item[0]+len(instances)-1]}",
+                    entities[len(entities) - 1].title,
+                    f"Shark {string.ascii_uppercase[item[0]+len(entities)-1]}",
                 )
 
     def test_limit_offset_list_without_data(self):
-        instances = movie.Movie.limit_offset_list()
+        entities = movie.Movie.limit_offset_list()
 
-        self.assertEqual(len(instances), 0)
+        self.assertEqual(len(entities), 0)
 
     def test_filter_by_title(self):
         create_movies()

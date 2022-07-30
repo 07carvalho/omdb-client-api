@@ -44,7 +44,9 @@ def test_coverage(pattern, test_pattern, coverage):
         try:
             from coverage import coverage
 
-            cov = coverage(include=["backend/*"], omit=["backend/test/*"])
+            cov = coverage(
+                include=["backend/*"], omit=["backend/test/*", "backend/wsgi/*"]
+            )
 
             cov.start()
         except ImportError:

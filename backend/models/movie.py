@@ -17,7 +17,7 @@ class Movie(base.BaseModel):
 
     @classmethod
     def bulk_create(cls, movies: List[MovieSchema]):
-        instances = [
+        entities = [
             cls(
                 title=movie.title,
                 imdb_id=movie.imdb_id,
@@ -26,7 +26,7 @@ class Movie(base.BaseModel):
             )
             for movie in movies
         ]
-        return ndb.put_multi(instances)
+        return ndb.put_multi(entities)
 
     @classmethod
     def delete(cls, instance_id):
