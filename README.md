@@ -1,7 +1,12 @@
 ## Running the project:
 
 start the backend:
-	gunicorn backend.gunicorn:application
+```
+export OMDB_APIKEY=<omdb_key>
+gunicorn backend.gunicorn:application
+```
 
 run tests:
-	python test.py
+```
+python test.py
+```
