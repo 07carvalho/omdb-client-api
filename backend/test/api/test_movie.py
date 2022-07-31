@@ -15,6 +15,9 @@ class TestMovieApi(test.TestCase):
 
         self.assertEqual(resp.get("offset"), 0)
         self.assertEqual(resp.get("limit"), 10)
+        self.assertEqual(len(resp.get("results")), 10)
+        self.assertEqual(resp.get("results")[0].get("title"), "Shark A")
+        self.assertEqual(resp.get("results")[9].get("title"), "Shark J")
 
     def test_list_with_params(self):
         create_movies()
@@ -24,6 +27,8 @@ class TestMovieApi(test.TestCase):
         self.assertEqual(resp.get("offset"), 10)
         self.assertEqual(resp.get("limit"), 20)
         self.assertEqual(len(resp.get("results")), 16)
+        self.assertEqual(resp.get("results")[0].get("title"), "Shark K")
+        self.assertEqual(resp.get("results")[15].get("title"), "Shark Z")
 
     def test_list_with_wrong_offset(self):
         resp = self.api_client.post("movie.list", dict(offset="A", limit=10))
