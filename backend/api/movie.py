@@ -52,12 +52,10 @@ class Movie(remote.Service):
             raise NotFound(message="Movie not found in IMDb")
 
         instance = movie.Movie.create(
-            {
-                "title": response.title,
-                "imdb_id": response.imdb_id,
-                "year": response.year,
-                "poster": response.poster,
-            }
+            title=response.title,
+            imdb_id=response.imdb_id,
+            year=response.year,
+            poster=response.poster,
         )
 
         return MovieResponse(

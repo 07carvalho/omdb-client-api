@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import repeat
 
 from backend.clients.omdb import OMDbClient
-from backend.models.movie import Movie
+from backend.models import movie
 
 
 class MovieService:
@@ -15,4 +15,4 @@ class MovieService:
             # yes, just shark movies
             for i in pool.map(search_movie, repeat("shark"), pages):
                 movies.extend(i)
-        return Movie.bulk_create(movies)
+        return movie.Movie.bulk_create(movies)
